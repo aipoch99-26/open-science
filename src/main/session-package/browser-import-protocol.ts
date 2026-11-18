@@ -1,4 +1,4 @@
-import project from './pelican-project.json'
+import { reviewedProjects } from './distributed-project-catalog'
 import { createHash } from 'node:crypto'
 import type { BrowserPackageTransfer, PackageOperationSnapshot } from '../../shared/session-package'
 
@@ -38,8 +38,11 @@ export function parseBrowserImportUrl(input: unknown): BrowserImportRequest | nu
     if (
       offline &&
       (origin !== 'null' ||
-        url.searchParams.get('name') !== project.filename ||
-        url.searchParams.get('size') !== String(project.bytes))
+        !reviewedProjects.some(
+          (project) =>
+            url.searchParams.get('name') === project.filename &&
+            url.searchParams.get('size') === String(project.bytes)
+        ))
     )
       return null
     const site = offline ? null : new URL(origin)

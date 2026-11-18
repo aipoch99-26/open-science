@@ -1,7 +1,7 @@
 import {
-  distributedProject,
+  type DistributedProject,
   importDistributedProject,
-  isDistributedProject
+  findDistributedProject
 } from './distributed-project'
 import { downloadUseCase } from './use-case-download'
 import type { UseCaseSource } from '../../shared/use-cases'
@@ -1044,10 +1044,12 @@ export class SessionPackageDesktop {
           }
           const importProject = async (
             input: string,
-            directory: string
+            directory: string,
+            project: DistributedProject
           ): Promise<SessionPackageRequest> => {
             this.options.assertCanStart?.()
             const identity = await importDistributedProject({
+              project,
               source: input,
               stage: directory,
               target,
@@ -1056,7 +1058,7 @@ export class SessionPackageDesktop {
               exists: this.options.importedSessionExists!,
               archiveSource: (id) =>
                 this.options.withDataRootWrite(() => this.options.archiveProjectSource!(id)),
-              forkMember: async (id, model) => {
+              forkMember: async (id, model, title) => {
                 const release = await this.options.reserveExport?.(id, signal)
                 try {
                   const fork = await this.options.withDataRootWrite(() =>
@@ -1065,7 +1067,7 @@ export class SessionPackageDesktop {
                         id,
                         signal,
                         this.operations.report,
-                        model + ' · Pelican ride'
+                        title ?? model + ' · Pelican ride'
                       )
                     )
                   )
@@ -1092,7 +1094,7 @@ export class SessionPackageDesktop {
                             ...progress,
                             overallPercent:
                               (100 * index + (packageImportPercent(progress) ?? 0)) /
-                              distributedProject.sessions.length
+                              project.sessions.length
                           }),
                         undefined,
                         destination
@@ -1111,12 +1113,14 @@ export class SessionPackageDesktop {
             this.operations.completeResult({ imported: identity, openConversation: true })
             return identity
           }
-          if (
-            sourcePath &&
-            this.options.projectReceipts &&
-            (await isDistributedProject(sourcePath, signal))
-          )
-            return this.staged((directory) => importProject(sourcePath!, directory), undefined)
+          if (sourcePath && this.options.projectReceipts) {
+            const project = await findDistributedProject(sourcePath, signal)
+            if (project)
+              return this.staged(
+                (directory) => importProject(sourcePath!, directory, project),
+                undefined
+              )
+          }
           if (sourcePath && validateBeforeTarget) {
             const inspectionPath = sourcePath
             // Browser uploads are untrusted bytes: reuse archive inspection before target selection.
@@ -1179,12 +1183,10 @@ export class SessionPackageDesktop {
               })
               if (!info.isFile() || info.size > PACKAGE_MAX_BYTES)
                 throw new Error('Session package exceeds the archive limit.')
-              if (
-                !sourcePath &&
-                this.options.projectReceipts &&
-                (await isDistributedProject(input, signal))
-              )
-                return importProject(input, directory)
+              if (!sourcePath && this.options.projectReceipts) {
+                const project = await findDistributedProject(input, signal)
+                if (project) return importProject(input, directory, project)
+              }
               const archive = join(directory, 'session.science')
               await this.copyArchive(input, archive, 'copying', signal)
               this.operations.report({ phase: 'validating' })

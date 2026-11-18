@@ -193,6 +193,8 @@
     "Startup stopped while accessing system credentials. Existing credentials and profile data have been preserved.": "システム認証情報へのアクセス中に起動が停止しました。既存の認証情報とプロファイルデータは保持されています。"
   },
   "renderer": {
+    "3D Lab": "3D ラボ",
+    "Create 3D Lab": "Create 3D Lab",
     "Pros": "利点",
     "Cons": "制約",
     "The conversation changed. Reopen the image editor and try again.": "会話が変更されました。画像エディターを開き直して、もう一度お試しください。",

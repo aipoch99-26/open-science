@@ -325,6 +325,15 @@ const createNotebookPreviewItem = (
   ...(runId ? { notebookRunId: runId, notebookRunFocusRequest: ++notebookRunFocusRequest } : {})
 })
 
+export const createLabPreviewItem = (sessionId: string, projectId: string): PreviewToolItem => ({
+  id: `tool:${sessionId}:lab-3d`,
+  sessionId,
+  projectId,
+  type: 'tool',
+  toolKind: 'lab-3d',
+  title: '3D Lab'
+})
+
 const createSessionPlanPreviewItem = (
   sessionId: string,
   projectId: string,

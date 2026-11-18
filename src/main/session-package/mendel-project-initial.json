@@ -1,0 +1,16 @@
+{
+  "filename": "Mendel-Laboratory.science",
+  "projectName": "Mendel\u2019s Pea Laboratory",
+  "bytes": 58826718,
+  "sha256": "3aff3c73216202b7bd687d0bc8432ea5d1c417908340505871a947d1d9e8ba99",
+  "sessions": [
+    {
+      "file": "session.science",
+      "model": "Mendel",
+      "title": "Reproducing Mendel\u2019s 1866 pea experiments",
+      "offset": 0,
+      "bytes": 58826718,
+      "sha256": "3aff3c73216202b7bd687d0bc8432ea5d1c417908340505871a947d1d9e8ba99"
+    }
+  ]
+}

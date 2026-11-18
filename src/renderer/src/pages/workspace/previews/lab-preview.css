@@ -1,0 +1,49 @@
+@media (prefers-reduced-motion: no-preference) {
+  .lab-outline path {
+    stroke-dasharray: 1;
+    animation: lab-draw 4.8s ease-in-out infinite;
+  }
+
+  .lab-bench {
+    animation: lab-assemble 4.8s ease-in-out infinite;
+  }
+
+  .lab-instruments {
+    animation: lab-assemble 4.8s 0.45s ease-in-out infinite backwards;
+  }
+}
+
+@keyframes lab-draw {
+  0%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  30%,
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 0.55;
+  }
+  95% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes lab-assemble {
+  0%,
+  16%,
+  100% {
+    transform: translateY(-9px);
+    opacity: 0;
+  }
+  43%,
+  77% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  92% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}

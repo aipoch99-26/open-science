@@ -195,6 +195,8 @@
     "Startup stopped while accessing system credentials. Existing credentials and profile data have been preserved.": "Le démarrage s’est arrêté pendant l’accès aux identifiants système. Les identifiants et les données de profil existants ont été conservés."
   },
   "renderer": {
+    "3D Lab": "Laboratoire 3D",
+    "Create 3D Lab": "Create 3D Lab",
     "Pros": "Avantages",
     "Cons": "Limites",
     "The conversation changed. Reopen the image editor and try again.": "La conversation a changé. Rouvrez l’éditeur d’images et réessayez.",

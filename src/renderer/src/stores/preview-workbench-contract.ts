@@ -63,6 +63,7 @@ export type PreviewToolItem = PreviewItemBase & {
   skillDetailRequest?: { skillId: string }
   toolKind?:
     | 'notebook'
+    | 'lab-3d'
     | 'files'
     | 'library'
     | 'marketplace'

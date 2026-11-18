@@ -7,9 +7,14 @@ import type {
   SessionPackageRequest,
   SessionPackageImportRequest
 } from '../../shared/session-package'
-import project from './pelican-project.json'
+import pelican from './pelican-project.json'
+import { reviewedProjects } from './distributed-project-catalog'
 
-export { project as distributedProject }
+export const distributedProject = pelican
+export type DistributedProject = Omit<typeof pelican, 'sessions'> & {
+  sessions: ((typeof pelican.sessions)[number] & { title?: string })[]
+}
+const projects: DistributedProject[] = reviewedProjects
 
 async function sha256(file: string, signal?: AbortSignal): Promise<string> {
   const hash = createHash('sha256')
@@ -17,22 +22,36 @@ async function sha256(file: string, signal?: AbortSignal): Promise<string> {
   return hash.digest('hex')
 }
 
-export async function isDistributedProject(file: string, signal?: AbortSignal): Promise<boolean> {
+export async function findDistributedProject(
+  file: string,
+  signal?: AbortSignal
+): Promise<DistributedProject | undefined> {
   const info = await stat(file)
-  return (
-    info.isFile() && info.size === project.bytes && (await sha256(file, signal)) === project.sha256
-  )
+  if (!info.isFile()) return
+  const candidates = projects.filter((item) => item.bytes === info.size)
+  if (!candidates.length) return
+  const digest = await sha256(file, signal)
+  return candidates.find((item) => item.sha256 === digest)
+}
+
+export async function isDistributedProject(file: string, signal?: AbortSignal): Promise<boolean> {
+  return !!(await findDistributedProject(file, signal))
 }
 
 // Only caller-verified catalog archives reach this path. Never extract paths supplied by a tar header.
 export async function importDistributedProject(options: {
+  project?: DistributedProject
   source: string
   stage: string
   receipts: string
   signal: AbortSignal
   target: SessionPackageImportRequest
   exists: (identity: SessionPackageRequest) => Promise<boolean>
-  forkMember: (id: SessionPackageRequest, model: string) => Promise<SessionPackageRequest>
+  forkMember: (
+    id: SessionPackageRequest,
+    model: string,
+    title?: string
+  ) => Promise<SessionPackageRequest>
   archiveSource: (id: SessionPackageRequest) => Promise<void>
   importMember: (
     path: string,
@@ -40,7 +59,7 @@ export async function importDistributedProject(options: {
     index: number
   ) => Promise<SessionPackageRequest>
 }): Promise<SessionPackageRequest> {
-  const { receipts, target, signal } = options
+  const { receipts, target, signal, project = distributedProject as DistributedProject } = options
   await mkdir(receipts, { recursive: true, mode: 0o700 })
   const key = createHash('sha256')
     .update(JSON.stringify([project.sha256, target.projectId ?? null, target.projectName ?? null]))
@@ -86,7 +105,7 @@ export async function importDistributedProject(options: {
         await rm(part)
       }
       projectId = native.projectId
-      await remember(member.file, await options.forkMember(native, member.model))
+      await remember(member.file, await options.forkMember(native, member.model, member.title))
     }
     if (native) await options.archiveSource(native)
   }

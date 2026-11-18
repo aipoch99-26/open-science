@@ -3,6 +3,7 @@ import { annotationTransfers, ANNOTATION_DRAG_TYPE } from './annotations/annotat
 import { SideChatWorkbenchContent } from './SideChatWorkbench'
 import {
   BookOpen,
+  Box,
   Clock,
   Cpu,
   FolderOpen,
@@ -324,7 +325,9 @@ const PreviewTab = ({
             ? t('Files')
             : tab.type === 'tool' && tab.toolKind === 'marketplace'
               ? t('Resource center')
-              : tab.title
+              : tab.type === 'tool' && tab.toolKind === 'lab-3d'
+                ? t('3D Lab')
+                : tab.title
 
   return (
     <div
@@ -389,6 +392,8 @@ const PreviewTab = ({
               className="size-3.5 shrink-0"
               aria-hidden="true"
             />
+          ) : tab.toolKind === 'lab-3d' ? (
+            <Box className="size-3.5 shrink-0" aria-hidden="true" />
           ) : tab.toolKind === 'files' ? (
             <FolderOpen className="size-3.5 shrink-0" aria-hidden="true" />
           ) : tab.toolKind === 'schedule' ? (

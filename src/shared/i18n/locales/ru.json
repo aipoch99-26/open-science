@@ -196,6 +196,8 @@
     "Startup stopped while accessing system credentials. Existing credentials and profile data have been preserved.": "Запуск остановлен при обращении к системным учётным данным. Существующие учётные данные и данные профиля сохранены."
   },
   "renderer": {
+    "3D Lab": "3D-лаборатория",
+    "Create 3D Lab": "Create 3D Lab",
     "Pros": "Преимущества",
     "Cons": "Ограничения",
     "The conversation changed. Reopen the image editor and try again.": "Диалог изменился. Откройте редактор изображений заново и повторите попытку.",

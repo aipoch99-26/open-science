@@ -22,6 +22,7 @@ import { usePreviewWorkbenchStore } from '@/stores/preview-workbench-store'
 import type { ChatSession } from '@/stores/session-store-contract'
 import { type SessionStore, useSessionStore } from '@/stores/session-store'
 
+import { LabPreview } from './LabPreview'
 import { NotebookPreview } from '../NotebookPreview'
 import type { NotebookPreviewItem } from '../NotebookPreview'
 import { ProjectFilesView } from '../ProjectFilesView'
@@ -327,6 +328,8 @@ export const PreviewToolContent = ({
     if (usePreviewWorkbenchStore.getState().removeItem(item.id))
       useNavigationStore.getState().openSchedule(activeProjectId)
   }, [activeProjectId, isActive, item.id, item.toolKind])
+
+  if (item.toolKind === 'lab-3d') return <LabPreview />
 
   if (item.toolKind === 'replay')
     return (

@@ -70,6 +70,7 @@ import { sessionPackageImportAvailable } from '@/lib/session-package-capabilitie
 import { cn } from '@/lib/utils'
 import { ConnectorCredentialControls } from '@/pages/settings/ConnectorCredentialDialog'
 import {
+  createLabPreviewItem,
   createSessionPlanPreviewItem,
   usePreviewWorkbenchStore
 } from '@/stores/preview-workbench-store'
@@ -84,6 +85,7 @@ import {
   ArrowUp,
   BookMarked,
   BookOpen,
+  Box,
   ChartNoAxesCombined,
   ChevronDown,
   ChevronRight,
@@ -2087,7 +2089,8 @@ const ConversationPanel = ({
                     tucks the strip behind the composer, so a notice between them would overlap.
                     Switching between a compact job bar and Notebook chrome remounts this layer so a
                     Notebook that becomes available after jobs still receives its entrance animation. */}
-                {notebookReference ||
+                {activeSession ||
+                notebookReference ||
                 messageQueue.items.length > 0 ||
                 backgroundTasksVisible ||
                 hasSubagents ||
@@ -2141,6 +2144,23 @@ const ConversationPanel = ({
                       >
                         <BookOpen className="size-3.5" strokeWidth={2} aria-hidden="true" />
                         {t('Notebook')}
+                      </button>
+                    ) : null}
+                    {activeSession ? (
+                      <button
+                        type="button"
+                        className="flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-2 text-[12px] font-normal text-text-100 transition-colors duration-200 ease-out hover:bg-bg-300 hover:text-text-000"
+                        aria-controls="right-panel"
+                        onClick={() =>
+                          usePreviewWorkbenchStore
+                            .getState()
+                            .upsertAndActivateItem(
+                              createLabPreviewItem(activeSession.id, activeSession.projectId)
+                            )
+                        }
+                      >
+                        <Box className="size-3.5" strokeWidth={2} aria-hidden="true" />
+                        {t('Create 3D Lab')}
                       </button>
                     ) : null}
                     <div className="flex-1" />

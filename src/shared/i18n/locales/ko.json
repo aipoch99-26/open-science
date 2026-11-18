@@ -193,6 +193,8 @@
     "Startup stopped while accessing system credentials. Existing credentials and profile data have been preserved.": "시스템 자격 증명에 접근하는 동안 시작이 중지되었습니다. 기존 자격 증명과 프로필 데이터는 보존되었습니다."
   },
   "renderer": {
+    "3D Lab": "3D 실험실",
+    "Create 3D Lab": "Create 3D Lab",
     "Pros": "장점",
     "Cons": "제약",
     "The conversation changed. Reopen the image editor and try again.": "대화가 변경되었습니다. 이미지 편집기를 다시 열고 재시도하세요.",

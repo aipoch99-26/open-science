@@ -193,6 +193,8 @@
     "Startup stopped while accessing system credentials. Existing credentials and profile data have been preserved.": "啟動在存取系統憑證時停止。現有憑證和設定檔資料已保留。"
   },
   "renderer": {
+    "3D Lab": "3D 實驗室",
+    "Create 3D Lab": "Create 3D Lab",
     "Pros": "優點",
     "Cons": "缺點",
     "The conversation changed. Reopen the image editor and try again.": "對話已變更。請重新開啟圖片編輯器後再試。",

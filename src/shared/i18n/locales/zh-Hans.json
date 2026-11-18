@@ -193,6 +193,8 @@
     "Startup stopped while accessing system credentials. Existing credentials and profile data have been preserved.": "启动在访问系统凭据时停止。现有凭据和配置文件数据已保留。"
   },
   "renderer": {
+    "3D Lab": "3D 实验室",
+    "Create 3D Lab": "Create 3D Lab",
     "Pros": "优点",
     "Cons": "缺点",
     "The conversation changed. Reopen the image editor and try again.": "对话已更改。请重新打开图片编辑器后重试。",
