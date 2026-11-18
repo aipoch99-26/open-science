@@ -68,5 +68,5 @@ export type BrowserImportTransfer = {
 /** Takes a complete browser-held Blob/File. Never fetches a remote package URL. */
 export function prepareBrowserImport(
   file: Blob,
-  options?: { filename?: string; origin?: string; port?: number }
+  options?: { filename?: string; origin?: string; port?: number; offlineProject?: boolean }
 ): BrowserImportTransfer

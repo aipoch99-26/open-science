@@ -3,6 +3,7 @@ protocols:
   - name: Open-Science browser import
     schemes:
       - open-science
+      - open-science-project
 productName: Open-Science
 copyright: Copyright © 2026 AIPOCH
 directories:

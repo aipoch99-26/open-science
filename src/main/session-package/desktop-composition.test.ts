@@ -54,6 +54,7 @@ const service = {
   importFrom: vi.fn<SessionPackageService['importFrom']>()
 }
 const archive = {
+  updateSessionArchive: vi.fn<Owners['archiveCoordinator']['updateSessionArchive']>(),
   reserveSessionExport: vi.fn<Owners['archiveCoordinator']['reserveSessionExport']>(),
   reserveProjectImport: vi.fn<Owners['archiveCoordinator']['reserveProjectImport']>()
 }

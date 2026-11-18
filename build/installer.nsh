@@ -64,6 +64,10 @@
     ${if} $0 == '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" "%1"'
       DeleteRegKey HKCU "Software\Classes\open-science"
     ${endif}
+    ReadRegStr $0 HKCU "Software\Classes\open-science-project\shell\open\command" ""
+    ${if} $0 == '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" "%1"'
+      DeleteRegKey HKCU "Software\Classes\open-science-project"
+    ${endif}
   ${endif}
   nsExec::ExecToLog '"$PLUGINSDIR\windows-uninstall-helper.exe" runtime-cache'
 !macroend
@@ -472,6 +476,10 @@ FunctionEnd
   WriteRegStr HKCU "Software\Classes\open-science" "URL Protocol" ""
   WriteRegStr HKCU "Software\Classes\open-science\DefaultIcon" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}",0'
   WriteRegStr HKCU "Software\Classes\open-science\shell\open\command" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" "%1"'
+  WriteRegStr HKCU "Software\Classes\open-science-project" "" "URL:Open-Science"
+  WriteRegStr HKCU "Software\Classes\open-science-project" "URL Protocol" ""
+  WriteRegStr HKCU "Software\Classes\open-science-project\DefaultIcon" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}",0'
+  WriteRegStr HKCU "Software\Classes\open-science-project\shell\open\command" "" '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" "%1"'
   ${if} ${Errors}
     DetailPrint "Open-Science protocol registration failed."
     !insertmacro quitFailedUpdate

@@ -1,3 +1,5 @@
+import { join } from 'node:path'
+import { resolveConfigRoot } from '../storage-root'
 import { SessionPackageDesktop } from './desktop'
 import type { SessionPackageService } from './service'
 import type { ArchiveCoordinator } from '../archive/coordinator'
@@ -16,7 +18,10 @@ import {
 type Owners = {
   sessionPackageService: SessionPackageService
   translate: NativeTranslator
-  archiveCoordinator: Pick<ArchiveCoordinator, 'reserveSessionExport' | 'reserveProjectImport'>
+  archiveCoordinator: Pick<
+    ArchiveCoordinator,
+    'reserveSessionExport' | 'reserveProjectImport' | 'updateSessionArchive'
+  >
   sessionPersistenceCoordinator: {
     reserveSessionExport: (projectId: string, sessionId: string) => Promise<() => void>
   }
@@ -45,6 +50,23 @@ export const createSessionPackageDesktop = ({
 }: Owners): SessionPackageDesktop => {
   return new SessionPackageDesktop({
     service: sessionPackageService,
+    archiveProjectSource: async (id) => {
+      const record = await sessionRepository.loadSession(id.projectId, id.sessionId)
+      if (record && !record.archivedAt) {
+        const session = await archiveCoordinator.updateSessionArchive({
+          ...id,
+          archived: true,
+          expectedRevision: record.revision ?? 0
+        })
+        applicationEvents.publish('session:updated', {
+          session,
+          originClientId: 'distributed-project-import'
+        })
+      }
+    },
+    projectReceipts: () => join(resolveConfigRoot(), 'distributed-projects'),
+    importedSessionExists: async ({ projectId, sessionId }) =>
+      Boolean(await sessionRepository.loadSession(projectId, sessionId)),
     cancelBrowserTransfer,
     translate,
     withDataRootWrite,

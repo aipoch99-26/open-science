@@ -131,13 +131,14 @@ export const checkBrowserImportAvailability = (options = {}) => discover(options
  * then call send(). Its result acknowledges local receipt, not the user's eventual import decision.
  */
 export function prepareBrowserImport(file, options = {}) {
-  const origin = options.origin ?? globalThis.location?.origin
+  const localProject = options.offlineProject === true && globalThis.location?.protocol === 'file:'
+  const origin = localProject ? 'null' : (options.origin ?? globalThis.location?.origin)
   if (!supported())
     throw new BrowserImportError(
       'unsupported-browser',
       'This browser cannot transfer packages to Open-Science.'
     )
-  validOrigin(origin)
+  if (!localProject) validOrigin(origin)
   const filename = options.filename ?? file?.name
   const port = options.port ?? 49152 + (crypto.getRandomValues(new Uint16Array(1))[0] % 16384)
   if (!(file instanceof Blob) || file.size <= 0 || file.size > MAX_BYTES)
@@ -157,7 +158,8 @@ export function prepareBrowserImport(file, options = {}) {
   if (!Number.isInteger(port) || port < 49152 || port > 65535)
     throw new Error('Invalid loopback port.')
   const secret = randomHex()
-  const url = `open-science://import?${new URLSearchParams({ version: '1', origin, secret, port: String(port), name: filename, size: String(file.size) })}`
+  const scheme = options.offlineProject ? 'open-science-project' : 'open-science'
+  const url = `${scheme}://import?${new URLSearchParams({ version: localProject ? '2' : '1', origin, secret, port: String(port), name: filename, size: String(file.size) })}`
   const base = `http://127.0.0.1:${port}/v1/import`
   const keyBytes = new Uint8Array(secret.match(/../g).map((part) => parseInt(part, 16)))
   const authKey = crypto.subtle.importKey(

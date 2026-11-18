@@ -1587,7 +1587,8 @@ export class SessionPackageService {
   fork(
     request: SessionPackageRequest,
     signal?: AbortSignal,
-    onProgress?: (progress: PackageProgress) => void
+    onProgress?: (progress: PackageProgress) => void,
+    title?: string
   ): Promise<SessionPackageRequest> {
     const safe = sessionPackageRequestSchema.parse(request)
     return this.serialize(async () => {
@@ -1613,7 +1614,8 @@ export class SessionPackageService {
             onProgress,
             undefined,
             { projectId: safe.projectId },
-            source
+            source,
+            title
           )
         }
       })
@@ -1664,7 +1666,8 @@ export class SessionPackageService {
     onProgress: ((progress: PackageProgress) => void) | undefined,
     confirm: ((preview: SessionPackagePreview, signal: AbortSignal) => Promise<void>) | undefined,
     target: SessionPackageImportRequest,
-    forkSource?: PersistedChatSession
+    forkSource?: PersistedChatSession,
+    forkTitle?: string
   ): Promise<{ projectId: string; sessionId: string }> {
     const retries = join(this.configRoot, 'session-package-log-retries')
     const intentPath = async (): Promise<string> => {
@@ -1759,7 +1762,8 @@ export class SessionPackageService {
             sessionId: previous?.sessionId ?? (forkSource ? randomUUID() : 'import-' + randomUUID())
           },
           allocate,
-          forkSource
+          forkSource,
+          forkTitle
         )
       )
     } finally {
@@ -1780,7 +1784,8 @@ export class SessionPackageService {
     allocate: (
       checksum: string
     ) => Promise<{ path: string; operationId: string; previous?: LogIdentityPlan }>,
-    forkSource?: PersistedChatSession
+    forkSource?: PersistedChatSession,
+    forkTitle?: string
   ): Promise<{ projectId: string; sessionId: string }> {
     if (target.projectId) await this.assertImportProject(target.projectId)
     // Only read-only imports use the import identity convention consumed by the lazy catalog.
@@ -1975,10 +1980,11 @@ export class SessionPackageService {
           session,
           forkSource,
           (await this.options.getDefaultPermissionProfile?.()) ?? DEFAULT_PERMISSION_PROFILE,
-          nextForkTitle(
-            forkSource.title,
-            siblings.map((sibling) => sibling.title)
-          )
+          forkTitle ??
+            nextForkTitle(
+              forkSource.title,
+              siblings.map((sibling) => sibling.title)
+            )
         )
       }
       validatePackageLiteratureSession(native.records, session)

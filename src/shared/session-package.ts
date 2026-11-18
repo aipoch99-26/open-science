@@ -179,6 +179,7 @@ export type PackageOperationSnapshot = {
   summary?: PackageSelectionSummary
   result?: {
     filePath?: string
+    openConversation?: boolean
     imported?: SessionPackageRequest
     recovery?: SessionPackageRequest & { operationId: string; outcome: 'committed' | 'unconfirmed' }
   }
@@ -469,6 +470,7 @@ const packageOperationSnapshotSchema: z.ZodType<PackageOperationSnapshot> = z
     result: z
       .object({
         filePath: z.string().optional(),
+        openConversation: z.boolean().optional(),
         imported: sessionPackageRequestSchema.optional(),
         recovery: sessionPackageRequestSchema
           .extend({ operationId: identity, outcome: z.enum(['committed', 'unconfirmed']) })

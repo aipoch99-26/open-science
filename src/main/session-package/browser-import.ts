@@ -3,6 +3,7 @@ import {
   parseBrowserImportUrl,
   type BrowserImportRequest
 } from './browser-import-protocol'
+import { isDistributedProject } from './distributed-project'
 export { parseBrowserImportUrl } from './browser-import-protocol'
 import { createDecipheriv, createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
@@ -437,6 +438,12 @@ export class BrowserPackageImport {
         await t.file!.close()
         t.file = undefined
         if (t.removed || this.closed || t.cancelled) return
+        if (t.request.origin === 'null' && !(await isDistributedProject(t.path!))) {
+          reply(response, 422)
+          void this.remove(t).catch(() => undefined)
+          return
+        }
+        if (t.cancelled || t.removed || this.closed) return
         const queued = await this.options.receive(t.path!, () => this.releaseSource(t))
         if (queued === false) {
           if (t.cancelled) return

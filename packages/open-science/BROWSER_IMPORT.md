@@ -466,3 +466,25 @@ synthesized Origin header, not a browser or installed desktop. These tests do no
 registration, browser prompt behavior, or real browser-to-desktop integration. No real desktop
 integration is run for this contract change. Packaged macOS/Windows/Linux and browser permission
 behavior remain separate manual validation boundaries.
+
+## Single-file Pelican project
+
+The project-import build also accepts the reviewed multi-session distribution recorded in
+`src/main/session-package/pelican-project.json`. A browser can pass its complete Blob to
+`prepareBrowserImport(blob, { filename, offlineProject: true })`, navigate to the returned URL
+from the user's click, and call `send()`. The project scheme is `open-science-project://import`.
+For a local HTML file the sender uses the file-origin transfer contract (version 2).
+The receiver checks the catalog size and filename at launch, the complete digest before accepting
+file-origin data, and each packaged native session before importing. Ordinary website transfers
+continue to use the original version 1 protocol.
+
+The same distribution opens from a native file picker or a local CLI import. Open-Science
+uses the project name in the catalog, creates a writable continuation for each native session,
+and archives the read-only import copies as provenance. In the desktop app a successful project
+handoff opens the entry conversation. The per-profile import receipt retains completed steps for
+retries and lets subsequent handoffs reopen the same project. Model calls use the receiving
+installation's own settings. Opening a package sends no prompt to a provider.
+
+To prepare another curated project, package the native session exports in a regular tar archive,
+record their offsets, sizes, model labels and SHA-256 digests, and update the catalog with the
+new archive's filename, size and digest before building the client.

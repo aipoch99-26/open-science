@@ -2827,3 +2827,31 @@ it.each([false, true])(
     )
   }
 )
+
+it('opens a distributed project directly in the conversation on cold start', async () => {
+  const imported = { projectId: 'ride-project', sessionId: 'editable-ride' }
+  const operation: PackageOperationSnapshot = {
+    id: 'project-received',
+    kind: 'import',
+    state: 'succeeded',
+    result: { imported, openConversation: true },
+    progress: { phase: 'importing' }
+  }
+  const navigate = vi.spyOn(useNavigationStore.getState(), 'openSession').mockReturnValue(true)
+  navigate.mockClear()
+  const loadOne = vi.fn(async () => undefined)
+  vi.stubGlobal('api', {
+    projects: {
+      list: async () => [{ id: imported.projectId, name: 'Ride', createdAt: 1, updatedAt: 1 }]
+    },
+    sessions: {
+      loadOne,
+      packageOperation: async () => operation,
+      onPackageOperation: () => () => undefined
+    }
+  })
+  await act(async () => root.render(<SessionPackageOperation />))
+  expect(loadOne).toHaveBeenCalledWith(imported)
+  expect(navigate).toHaveBeenCalledExactlyOnceWith(imported.projectId, imported.sessionId, 'user')
+  expect(usePackageOperationStore.getState().open).toBe(false)
+})

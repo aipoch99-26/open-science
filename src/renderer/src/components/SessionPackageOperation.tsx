@@ -70,7 +70,7 @@ const openPackageSession = (operation: PackageOperationSnapshot): boolean => {
   const identity = operation.result?.imported
   if (!identity) return false
   const { projectId, sessionId } = identity
-  if (operation.kind !== 'import')
+  if (operation.kind !== 'import' || operation.result?.openConversation)
     return useNavigationStore.getState().openSession(projectId, sessionId, 'user')
   return useNavigationStore.getState().openSession(projectId, sessionId, 'user', () => {
     const session = useSessionStore.getState().sessions.find((item) => item.id === sessionId)
@@ -640,24 +640,37 @@ export const SessionPackageOperation = (): React.JSX.Element | null => {
   useEffect(() => {
     if (
       isWeb ||
-      navigationIntent.current?.operationId !== sourceOperation?.id ||
+      (!sourceOperation?.result?.openConversation &&
+        navigationIntent.current?.operationId !== sourceOperation?.id) ||
       sourceOperation?.state !== 'succeeded' ||
       !sourceOperation.result?.imported ||
       openedImport.current === sourceOperation.id
     )
       return
     openedImport.current = sourceOperation.id
-    const revision = navigationIntent.current?.revision
+    const revision = sourceOperation.result.openConversation
+      ? useNavigationStore.getState().explicitNavigationRevision
+      : navigationIntent.current?.revision
     if (revision !== useNavigationStore.getState().explicitNavigationRevision) return
     void useProjectStore
       .getState()
       .loadProjects()
-      .then(() => {
+      .then(async () => {
+        const identity = sourceOperation.result?.imported
+        if (
+          sourceOperation.result?.openConversation &&
+          identity &&
+          !useSessionStore.getState().sessions.some((session) => session.id === identity.sessionId)
+        ) {
+          const session = await window.api.sessions.loadOne(identity)
+          if (session) useSessionStore.getState().upsertPersistedSession(session)
+        }
         if (revision !== useNavigationStore.getState().explicitNavigationRevision) return
-        openPackageSession(sourceOperation)
+        if (openPackageSession(sourceOperation) && sourceOperation.result?.openConversation)
+          dismissLocal()
       })
       .catch(() => undefined)
-  }, [sourceOperation, isWeb])
+  }, [sourceOperation, isWeb, dismissLocal])
   if (isRemoteWeb || !operation) return null
   const errorId = operation.browserReceiptOnly
     ? (primaryBrowserTransfer(operation)?.id ?? operation.id)

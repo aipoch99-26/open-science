@@ -1,3 +1,8 @@
+import {
+  distributedProject,
+  importDistributedProject,
+  isDistributedProject
+} from './distributed-project'
 import { downloadUseCase } from './use-case-download'
 import type { UseCaseSource } from '../../shared/use-cases'
 import { desktopShellInteraction, desktopFileInteraction } from '../desktop-interaction'
@@ -85,6 +90,9 @@ export class SessionPackageDesktop {
   private operation: Promise<unknown> = Promise.resolve()
   constructor(
     private readonly options: {
+      archiveProjectSource?: (identity: SessionPackageRequest) => Promise<void>
+      projectReceipts?: () => string
+      importedSessionExists?: (identity: SessionPackageRequest) => Promise<boolean>
       service: SessionPackageService
       translate: NativeTranslator
       withDataRootWrite: <T>(work: () => Promise<T>) => Promise<T>
@@ -1034,6 +1042,81 @@ export class SessionPackageDesktop {
               release?.()
             }
           }
+          const importProject = async (
+            input: string,
+            directory: string
+          ): Promise<SessionPackageRequest> => {
+            this.options.assertCanStart?.()
+            const identity = await importDistributedProject({
+              source: input,
+              stage: directory,
+              target,
+              signal,
+              receipts: this.options.projectReceipts!(),
+              exists: this.options.importedSessionExists!,
+              archiveSource: (id) =>
+                this.options.withDataRootWrite(() => this.options.archiveProjectSource!(id)),
+              forkMember: async (id, model) => {
+                const release = await this.options.reserveExport?.(id, signal)
+                try {
+                  const fork = await this.options.withDataRootWrite(() =>
+                    this.acceptCleanup(() =>
+                      this.options.service.fork(
+                        id,
+                        signal,
+                        this.operations.report,
+                        model + ' · Pelican ride'
+                      )
+                    )
+                  )
+                  await this.options.afterImport(fork, originClientId, false).catch(() => undefined)
+                  return fork
+                } finally {
+                  release?.()
+                }
+              },
+              importMember: async (member, destination, index) => {
+                const release =
+                  destination.projectId &&
+                  (sourcePath || destination.projectId !== target.projectId)
+                    ? await this.options.reserveImport?.(destination.projectId, signal)
+                    : undefined
+                try {
+                  const result = await this.options.withDataRootWrite(() =>
+                    this.acceptCleanup(() =>
+                      this.options.service.importFrom(
+                        member,
+                        signal,
+                        (progress) =>
+                          this.operations.report({
+                            ...progress,
+                            overallPercent:
+                              (100 * index + (packageImportPercent(progress) ?? 0)) /
+                              distributedProject.sessions.length
+                          }),
+                        undefined,
+                        destination
+                      )
+                    )
+                  )
+                  await this.options
+                    .afterImport(result, originClientId, !destination.projectId)
+                    .catch(() => undefined)
+                  return result
+                } finally {
+                  release?.()
+                }
+              }
+            })
+            this.operations.completeResult({ imported: identity, openConversation: true })
+            return identity
+          }
+          if (
+            sourcePath &&
+            this.options.projectReceipts &&
+            (await isDistributedProject(sourcePath, signal))
+          )
+            return this.staged((directory) => importProject(sourcePath!, directory), undefined)
           if (sourcePath && validateBeforeTarget) {
             const inspectionPath = sourcePath
             // Browser uploads are untrusted bytes: reuse archive inspection before target selection.
@@ -1096,6 +1179,12 @@ export class SessionPackageDesktop {
               })
               if (!info.isFile() || info.size > PACKAGE_MAX_BYTES)
                 throw new Error('Session package exceeds the archive limit.')
+              if (
+                !sourcePath &&
+                this.options.projectReceipts &&
+                (await isDistributedProject(input, signal))
+              )
+                return importProject(input, directory)
               const archive = join(directory, 'session.science')
               await this.copyArchive(input, archive, 'copying', signal)
               this.operations.report({ phase: 'validating' })

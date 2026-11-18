@@ -12,6 +12,8 @@ import {
   useQuitPersistenceFlush,
   type QuitPersistenceFlushProjection
 } from '@/hooks/useQuitPersistenceFlush'
+import { usePackageOperationStore } from '@/stores/package-operation-store'
+import { useNavigationStore } from '@/stores/navigation-store'
 import { useNotebookEnvStore } from '@/stores/notebook-env-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useSettingsStore, type SettingsLoadFailure } from '@/stores/settings-store'
@@ -53,6 +55,17 @@ type ApplicationStartupProjection = Readonly<{
 // Owns application initialization order while projecting only the startup state and commands the
 // presentation and event-binding modules need.
 const useApplicationStartup = (): ApplicationStartupProjection => {
+  // Opening a verified project can display its conversation before first-time model setup.
+  // The user's onboarding state and all runtime/storage gates still belong to their original owners.
+  const handedOffProject = usePackageOperationStore(({ operation }) =>
+    operation?.state === 'succeeded' && operation.result?.openConversation
+      ? operation.result.imported?.projectId
+      : undefined
+  )
+  const workspaceProject = useNavigationStore(({ view, activeProjectId }) =>
+    view === 'workspace' ? activeProjectId : undefined
+  )
+  const viewingImportedProject = Boolean(handedOffProject && workspaceProject === handedOffProject)
   const sessions = useSessionPersistence()
   const quitPersistence = useQuitPersistenceFlush()
   useDeepLinkNavigation({ isHydrated: sessions.isHydrated, isReady: sessions.isReady })
@@ -164,7 +177,9 @@ const useApplicationStartup = (): ApplicationStartupProjection => {
       loadAttempt: settingsLoadAttempt ?? 0,
       snapshotRevision: settingsSnapshotRevision ?? 0,
       startupView: isSettingsLoaded
-        ? resolveStartupView({ onboardingDone: onboardingCompletedAt !== undefined })
+        ? resolveStartupView({
+            onboardingDone: onboardingCompletedAt !== undefined || viewingImportedProject
+          })
         : undefined,
       retry: retrySettings
     },

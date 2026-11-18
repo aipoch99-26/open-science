@@ -1,3 +1,4 @@
+import project from './pelican-project.json'
 import { createHash } from 'node:crypto'
 import type { BrowserPackageTransfer, PackageOperationSnapshot } from '../../shared/session-package'
 
@@ -15,7 +16,7 @@ export function parseBrowserImportUrl(input: unknown): BrowserImportRequest | nu
   try {
     const url = new URL(input)
     if (
-      url.protocol !== 'open-science:' ||
+      !['open-science:', 'open-science-project:'].includes(url.protocol) ||
       url.hostname !== 'import' ||
       url.port ||
       url.username ||
@@ -28,15 +29,27 @@ export function parseBrowserImportUrl(input: unknown): BrowserImportRequest | nu
     if (
       url.searchParams.size !== keys.length ||
       keys.some((key) => url.searchParams.getAll(key).length !== 1) ||
-      url.searchParams.get('version') !== '1'
+      !['1', '2'].includes(url.searchParams.get('version') ?? '')
     )
       return null
     const origin = url.searchParams.get('origin')!
-    const site = new URL(origin)
+    const offline = url.searchParams.get('version') === '2'
+    if (offline && url.protocol !== 'open-science-project:') return null
     if (
-      site.origin !== origin ||
-      (site.protocol !== 'https:' &&
-        !(site.protocol === 'http:' && ['127.0.0.1', 'localhost', '[::1]'].includes(site.hostname)))
+      offline &&
+      (origin !== 'null' ||
+        url.searchParams.get('name') !== project.filename ||
+        url.searchParams.get('size') !== String(project.bytes))
+    )
+      return null
+    const site = offline ? null : new URL(origin)
+    if (
+      site &&
+      (site.origin !== origin ||
+        (site.protocol !== 'https:' &&
+          !(
+            site.protocol === 'http:' && ['127.0.0.1', 'localhost', '[::1]'].includes(site.hostname)
+          )))
     )
       return null
     const secret = url.searchParams.get('secret')!
