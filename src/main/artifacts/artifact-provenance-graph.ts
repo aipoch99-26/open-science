@@ -673,7 +673,9 @@ const boundGraph = (input: ArtifactProvenanceGraph): ArtifactProvenanceGraph => 
   graph = sortGraph({
     ...graph,
     completeness: 'incomplete',
-    reasonCodes: [...graph.reasonCodes, 'graph-budget-exceeded'],
+    reasonCodes: [
+      ...new Set<ArtifactProvenanceGraphReason>([...graph.reasonCodes, 'graph-budget-exceeded'])
+    ],
     activities,
     entities: entitiesForEdges(),
     edges,
@@ -1538,6 +1540,12 @@ const artifactProvenanceGraphValue = (value: unknown): value is ArtifactProvenan
   }
   return graphBytes(typed) <= MAX_GRAPH_BYTES && graphIsAcyclic(typed)
 }
+
+// Import may lengthen a valid graph's storage keys and identifiers. Reuse the publication
+// budget and its explicit incompleteness marker before resealing the local recipe.
+export const boundRelocatedProvenanceGraph = (
+  graph: ArtifactProvenanceGraph
+): ArtifactProvenanceGraph => (graphBytes(graph) <= MAX_GRAPH_BYTES ? graph : boundGraph(graph))
 
 const artifactProvenanceGraphMatchesTarget = (
   graph: ArtifactProvenanceGraph,

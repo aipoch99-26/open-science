@@ -1,29 +1,29 @@
 {
   "filename": "Pelican-Bicycle-Studio.science",
   "projectName": "Pelican Bicycle Studio",
-  "bytes": 434329600,
-  "sha256": "3f57e569805a6f236518e69293975f578b275d16f2a1fff22329662fa9834a17",
+  "bytes": 434339840,
+  "sha256": "8efd52c8b4ca894d18c565ab83e9965fb554f253cc620d015ef3e80844bb0c5d",
   "sessions": [
     {
       "file": "sessions/01.science",
       "model": "Claude Fable 5.2",
       "bytes": 174290757,
       "sha256": "6806e5719e0f073756d777470958a4152897bdfc95a3703fcb19f0202ac03c6a",
-      "offset": 14848
+      "offset": 18432
     },
     {
       "file": "sessions/02.science",
       "model": "Claude Opus 5.5",
       "bytes": 236542508,
       "sha256": "6dffd9fc71939323179206f6ae2a995b60baabe52ace0d601165a3e7015b715e",
-      "offset": 174306304
+      "offset": 174309888
     },
     {
       "file": "sessions/03.science",
       "model": "DeepSeek V4.1 Flash",
       "bytes": 23475805,
       "sha256": "c5fc2f6c1cda7fc5800e4dd3cebd5c12f1aa5c1bf40b723c4e9d36ce50db36e9",
-      "offset": 410849792
+      "offset": 410853376
     }
   ]
 }

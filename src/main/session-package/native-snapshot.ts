@@ -33,6 +33,7 @@ import {
 import type { SessionPackageManifest, SessionPackageRequest } from '../../shared/session-package'
 import type { PersistedChatSession } from '../../shared/session-persistence'
 import { createUploadVersionReference, parseUploadVersionReference } from '../../shared/uploads'
+import { boundRelocatedProvenanceGraph } from '../artifacts/artifact-provenance-graph'
 import { canonicalJson, sha256, type CanonicalJson } from '../artifacts/provenance-canonical'
 import { reproductionRecipes } from '../artifacts/reproducibility-host'
 import { validatePackageLiterature } from './literature'
@@ -924,6 +925,8 @@ export const prepareNativeImport = async (
         // The source snapshot was validated before remapping. Its derived local graph now has
         // different identities, so seal the recipe again before computing the outer checksum.
         const snapshot = value as unknown as PersistedArtifactExecutionSnapshot
+        if (snapshot.provenanceGraph?.schemaVersion === 1)
+          snapshot.provenanceGraph = boundRelocatedProvenanceGraph(snapshot.provenanceGraph)
         if (snapshot.analysisRevision && snapshot.provenanceGraph) {
           // Preserve the source analyzer revisions; remapping does not rerun analysis.
           const fields = {
