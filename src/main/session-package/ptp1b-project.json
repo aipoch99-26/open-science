@@ -1,0 +1,16 @@
+{
+  "filename": "PTP1B-Molecular-Laboratory.science",
+  "projectName": "PTP1B Molecular Laboratory",
+  "bytes": 101217293,
+  "sha256": "a0292a94fb3fe21d9950baf7fda19834cb78b70e7a192dd414fa86dbf69a075f",
+  "sessions": [
+    {
+      "file": "session.science",
+      "model": "PTP1B Molecular Laboratory",
+      "title": "Comparing the PTP1B loop and its allosteric site",
+      "offset": 0,
+      "bytes": 101217293,
+      "sha256": "a0292a94fb3fe21d9950baf7fda19834cb78b70e7a192dd414fa86dbf69a075f"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "filename": "Black-Hole-Observatory.science",
+  "projectName": "Black Hole Observatory",
+  "bytes": 65589134,
+  "sha256": "63aa133840c3f27d8c1682fbd37d39246e285d41dad7ba41f4814e00f8ca3eb9",
+  "sessions": [
+    {
+      "file": "session.science",
+      "model": "Black Hole Observatory",
+      "title": "Reproducing the modular bound and the Hawking–Page transition",
+      "offset": 0,
+      "bytes": 65589134,
+      "sha256": "63aa133840c3f27d8c1682fbd37d39246e285d41dad7ba41f4814e00f8ca3eb9"
+    }
+  ]
+}
